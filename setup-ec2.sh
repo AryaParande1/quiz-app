@@ -1,10 +1,13 @@
 #!/bin/bash
 # ====================================================================
 # AWS EC2 Automated Setup Script (Optimized for t3.micro - 1GB RAM)
-# Configures 4GB Swap, Java 17, Jenkins, Docker, Minikube & kubectl
+# Configures 4GB Swap, Java 17, Jenkins (2026 GPG key), Docker, Minikube
 # ====================================================================
 
 set -e
+
+# Clean up any leftover broken Jenkins apt configurations first
+sudo rm -f /etc/apt/sources.list.d/jenkins* /etc/apt/trusted.gpg.d/jenkins* /usr/share/keyrings/jenkins*
 
 echo "==> Step 1: Setting up 4GB Swap space for t3.micro memory stability..."
 if [ ! -f /swapfile ]; then
@@ -30,15 +33,9 @@ sudo usermod -aG docker ubuntu
 echo "==> Step 4: Installing Java 17 & Jenkins with memory limits..."
 sudo apt install -y openjdk-17-jdk
 
-# Remove any previous misconfigured key or source
-sudo rm -f /etc/apt/sources.list.d/jenkins.list /etc/apt/trusted.gpg.d/jenkins* /usr/share/keyrings/jenkins*
-
-# Download Jenkins GPG key and add directly to trusted keyring
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/jenkins.gpg
-echo "deb [signed-by=/etc/apt/trusted.gpg.d/jenkins.gpg] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list
-
-# Fallback: Also import key directly from keyserver if needed
-sudo gpg --no-default-keyring --keyring /etc/apt/trusted.gpg.d/jenkins.gpg --keyserver keyserver.ubuntu.com --recv-keys 7198F4B714ABFC68 || true
+sudo mkdir -p /usr/share/keyrings
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 sudo apt update
 sudo apt install -y jenkins
@@ -63,7 +60,6 @@ curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-
 sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
 echo "==> Step 7: Starting Minikube on t3.micro (with --force and swap tolerance)..."
-# t3.micro has 2 vCPUs; with 4GB swap we allocate 1800MB memory safely
 minikube start --driver=docker --cpus=2 --memory=1800mb --force --extra-config=kubelet.fail-swap-on=false --listen-address=0.0.0.0
 
 echo "==> Step 8: Configuring Jenkins user for Minikube & kubectl..."
