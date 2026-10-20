@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Configure with your Docker Hub username
-        DOCKERHUB_USER    = 'yourdockerhubuser'
+        DOCKERHUB_USER    = 'aryaparande27'
         IMAGE_NAME        = 'quiz-app'
         IMAGE_TAG         = "${BUILD_NUMBER}"
         FULL_IMAGE_NAME   = "${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
