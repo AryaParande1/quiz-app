@@ -30,12 +30,15 @@ sudo usermod -aG docker ubuntu
 echo "==> Step 4: Installing Java 17 & Jenkins with memory limits..."
 sudo apt install -y openjdk-17-jdk
 
-sudo mkdir -p /usr/share/keyrings
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
-  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+# Remove any previous misconfigured key or source
+sudo rm -f /etc/apt/sources.list.d/jenkins.list /etc/apt/trusted.gpg.d/jenkins* /usr/share/keyrings/jenkins*
 
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee \
-  /etc/apt/sources.list.d/jenkins.list > /dev/null
+# Download Jenkins GPG key and add directly to trusted keyring
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/jenkins.gpg
+echo "deb [signed-by=/etc/apt/trusted.gpg.d/jenkins.gpg] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list
+
+# Fallback: Also import key directly from keyserver if needed
+sudo gpg --no-default-keyring --keyring /etc/apt/trusted.gpg.d/jenkins.gpg --keyserver keyserver.ubuntu.com --recv-keys 7198F4B714ABFC68 || true
 
 sudo apt update
 sudo apt install -y jenkins
