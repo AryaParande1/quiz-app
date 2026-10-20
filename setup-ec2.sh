@@ -1,13 +1,10 @@
 #!/bin/bash
 # ====================================================================
 # AWS EC2 Automated Setup Script (Optimized for t3.micro - 1GB RAM)
-# Configures 4GB Swap, Java 17, Jenkins (2026 GPG key), Docker, Minikube
+# Installs: 4GB Swap, Java 17, Jenkins, Docker, Minikube & kubectl
 # ====================================================================
 
 set -e
-
-# Clean up any leftover broken Jenkins apt configurations first
-sudo rm -f /etc/apt/sources.list.d/jenkins* /etc/apt/trusted.gpg.d/jenkins* /usr/share/keyrings/jenkins*
 
 echo "==> Step 1: Setting up 4GB Swap space for t3.micro memory stability..."
 if [ ! -f /swapfile ]; then
@@ -22,8 +19,9 @@ else
 fi
 
 echo "==> Step 2: Updating system packages and installing prerequisites..."
+sudo rm -f /etc/apt/sources.list.d/jenkins* /etc/apt/trusted.gpg.d/jenkins* /usr/share/keyrings/jenkins*
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y apt-transport-https ca-certificates curl software-properties-common conntrack
+sudo apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common conntrack
 
 echo "==> Step 3: Installing Docker..."
 sudo apt install -y docker.io
@@ -33,8 +31,15 @@ sudo usermod -aG docker ubuntu
 echo "==> Step 4: Installing Java 17 & Jenkins with memory limits..."
 sudo apt install -y openjdk-17-jdk
 
-sudo mkdir -p /usr/share/keyrings
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+sudo mkdir -p /usr/share/keyrings /etc/apt/trusted.gpg.d
+
+# Fetch key 7198F4B714ABFC68 directly from keyserver or web fallback
+sudo gpg --keyserver keyserver.ubuntu.com --recv-keys 7198F4B714ABFC68 || \
+  curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/jenkins.gpg
+
+sudo gpg --export 7198F4B714ABFC68 | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null || true
+sudo gpg --export 7198F4B714ABFC68 | sudo tee /etc/apt/trusted.gpg.d/jenkins.gpg > /dev/null || true
+
 echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 sudo apt update
