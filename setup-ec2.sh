@@ -28,8 +28,8 @@ sudo apt install -y docker.io
 sudo systemctl enable --now docker
 sudo usermod -aG docker ubuntu
 
-echo "==> Step 4: Installing Java 17 & Jenkins with memory limits..."
-sudo apt install -y openjdk-17-jdk
+echo "==> Step 4: Installing Java 21 & Jenkins with memory limits..."
+sudo apt install -y openjdk-21-jdk
 
 # Configure Jenkins repository with [trusted=yes] to bypass GPG key ring errors
 echo "deb [trusted=yes] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
