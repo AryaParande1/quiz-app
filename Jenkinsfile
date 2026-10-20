@@ -8,6 +8,7 @@ pipeline {
         IMAGE_TAG         = "${BUILD_NUMBER}"
         FULL_IMAGE_NAME   = "${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
         LATEST_IMAGE_NAME  = "${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
+        KUBECONFIG        = '/var/lib/jenkins/.kube/config'
     }
 
     options {
@@ -34,13 +35,15 @@ pipeline {
             steps {
                 echo "==> Installing dependencies and executing pytest test suite..."
                 sh '''
-                    python3 -m venv venv || virtualenv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    
-                    echo "Running pytest unit tests..."
-                    pytest tests/ -v --junitxml=test-results.xml
+                    python3 -m venv venv || true
+                    if [ -d venv/bin ]; then
+                        . venv/bin/activate
+                        pip install -r requirements.txt
+                        pytest tests/ -v --junitxml=test-results.xml
+                    else
+                        pip3 install -r requirements.txt --break-system-packages
+                        pytest tests/ -v --junitxml=test-results.xml
+                    fi
                 '''
             }
             post {
