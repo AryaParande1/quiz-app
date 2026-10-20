@@ -2,7 +2,7 @@
 Quiz App - CI/CD Pipeline Academic Demonstration Project
 Course: Cloud Computing and DevOps (TYCSE)
 Author: DevOps Student Team
-Version: v1.0.0
+Version: v2.0.0
 """
 
 from flask import Flask, render_template, jsonify, request
@@ -12,7 +12,7 @@ import time
 app = Flask(__name__)
 
 # Application Version Identifier (Updated during Run 2 to demonstrate CD)
-APP_VERSION = os.getenv("APP_VERSION", "v1.0.0")
+APP_VERSION = os.getenv("APP_VERSION", "v2.0.0")
 APP_ENV = os.getenv("APP_ENV", "Production")
 START_TIME = time.time()
 
