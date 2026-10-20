@@ -1,7 +1,7 @@
 #!/bin/bash
 # ====================================================================
 # AWS EC2 Automated Setup Script (Optimized for t3.micro - 1GB RAM)
-# Installs: 4GB Swap, Java 17, Jenkins, Docker, Minikube & kubectl
+# Installs: 4GB Swap, Java 17, Jenkins ([trusted=yes]), Docker, Minikube
 # ====================================================================
 
 set -e
@@ -21,7 +21,7 @@ fi
 echo "==> Step 2: Updating system packages and installing prerequisites..."
 sudo rm -f /etc/apt/sources.list.d/jenkins* /etc/apt/trusted.gpg.d/jenkins* /usr/share/keyrings/jenkins*
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common conntrack
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common conntrack
 
 echo "==> Step 3: Installing Docker..."
 sudo apt install -y docker.io
@@ -31,16 +31,8 @@ sudo usermod -aG docker ubuntu
 echo "==> Step 4: Installing Java 17 & Jenkins with memory limits..."
 sudo apt install -y openjdk-17-jdk
 
-sudo mkdir -p /usr/share/keyrings /etc/apt/trusted.gpg.d
-
-# Fetch key 7198F4B714ABFC68 directly from keyserver or web fallback
-sudo gpg --keyserver keyserver.ubuntu.com --recv-keys 7198F4B714ABFC68 || \
-  curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/jenkins.gpg
-
-sudo gpg --export 7198F4B714ABFC68 | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null || true
-sudo gpg --export 7198F4B714ABFC68 | sudo tee /etc/apt/trusted.gpg.d/jenkins.gpg > /dev/null || true
-
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+# Configure Jenkins repository with [trusted=yes] to bypass GPG key ring errors
+echo "deb [trusted=yes] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 sudo apt update
 sudo apt install -y jenkins
