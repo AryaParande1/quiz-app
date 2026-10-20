@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudOps Quiz Portal - {{ version }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header with Version Badge for CI/CD Redeployment Demo -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <div>
+          <h1>CloudOps Quiz Portal</h1>
+          <p class="subtitle">Cloud Computing & DevOps CI/CD Demo</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge env-badge">{{ environment }}</span>
+        <span class="badge version-badge" id="versionTag">{{ version }}</span>
+      </div>
+    </header>
+
+    <!-- Main Card Container -->
+    <main class="card" id="quizCard">
+      <!-- Loading State -->
+      <div id="loadingView" class="view-state">
+        <div class="spinner"></div>
+        <p>Loading questions from API...</p>
+      </div>
+
+      <!-- Welcome / Start Screen -->
+      <div id="startView" class="view-state hidden">
+        <div class="hero-icon">🎯</div>
+        <h2>Test Your Cloud & DevOps Knowledge</h2>
+        <p class="description">
+          Demonstrate interactive containerized deployment on Minikube via Jenkins CI/CD.
+        </p>
+        <div class="meta-pills">
+          <span>⏱️ 20s per question</span>
+          <span>📊 5 Questions</span>
+          <span>🚀 Live Evaluation</span>
+        </div>
+        <button id="startBtn" class="btn btn-primary btn-large">Start Quiz</button>
+      </div>
+
+      <!-- Question Active View -->
+      <div id="quizView" class="view-state hidden">
+        <div class="quiz-topbar">
+          <span class="question-tracker" id="qTracker">Question 1 / 5</span>
+          <div class="timer-box">
+            <span class="timer-icon">⏳</span>
+            <span id="timerDisplay">20s</span>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="question-box">
+          <span class="category-pill" id="qCategory">DevOps</span>
+          <h3 class="question-text" id="qText">Question goes here...</h3>
+        </div>
+
+        <div class="options-grid" id="optionsContainer">
+          <!-- Dynamic Option Buttons -->
+        </div>
+
+        <div class="quiz-footer">
+          <div id="feedbackNotice" class="feedback-notice hidden"></div>
+          <button id="nextBtn" class="btn btn-primary" disabled>Next Question ➜</button>
+        </div>
+      </div>
+
+      <!-- Results View -->
+      <div id="resultsView" class="view-state hidden">
+        <div class="result-badge" id="badgeContainer">🏆</div>
+        <h2 id="resultTitle">Quiz Completed!</h2>
+        <p class="result-subtitle" id="resultSubtitle">Here is your automated score report</p>
+
+        <div class="score-summary-grid">
+          <div class="stat-card">
+            <span class="stat-num" id="scoreNum">0</span>
+            <span class="stat-label">Score</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="percentNum">0%</span>
+            <span class="stat-label">Accuracy</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="badgeRank">Rank</span>
+            <span class="stat-label">Achievement</span>
+          </div>
+        </div>
+
+        <div class="breakdown-container">
+          <h4>Detailed Question Review</h4>
+          <div id="reviewList" class="review-list"></div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="restartBtn" class="btn btn-primary">Retake Quiz</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer with Health Check Probe Link -->
+    <footer class="app-footer">
+      <span>Deployed with Jenkins &amp; Kubernetes (Minikube)</span>
+      <span>•</span>
+      <a href="/api/health" target="_blank" class="health-link">Liveness Probe: <code>/api/health</code></a>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
